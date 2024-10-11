@@ -1,4 +1,4 @@
-import {v2 as cloudinary} from 'cloudinary '
+import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
 
 cloudinary.config({
@@ -28,9 +28,6 @@ const uploadOnCloudinary=async (localFilePath)=>{
 }
 
 
-cloudinary.v2.upload("..",{public_id: ""},
-    function(error,result) {
-        console.log(result);
-    }
-)
+
+export {uploadOnCloudinary}
 
