@@ -37,6 +37,8 @@ const registerUser= asyncHandler(async (req,res)=>{
 
 
     const {fullName,email,username,password}=req.body
+    console.log(email,username)
+    
         // console.log("email " , email)
 
     if(
@@ -50,32 +52,32 @@ const registerUser= asyncHandler(async (req,res)=>{
         $or : [{username} , {email}]
     })
 
-    console.log(username,email)
     
     if(ExistedUser){
         throw new ApiError(409, "User with email or username already existed")
     }
+    console.log(req.files)
 
     const avatarLocalPath= req.files?.avatar[0]?.path;
     // const coverImageLocalPath= req.files?.coverImage[0]?.path;
      
     let coverImageLocalPath;
-    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length()>0){
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
         coverImageLocalPath=req.files.coverImage[0].path
     }
     
-    console.log(coverImageLocalPath)
+    console.log(coverImageLocalPath,avatarLocalPath)
  
     if(!avatarLocalPath){
-        throw new ApiError(400, "Avatar file is required")
+        throw new ApiError(400, "Avatar path not found")
     }
 
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage=await uploadOnCloudinary(coverImageLocalPath)
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
      
     if(!avatar){
-        throw new ApiError(400, "Avatar file is required")
+        throw new ApiError(400, `Avatar file not found ${avatar?.error?.message}`)
     } 
 
     const user = await User.create({
@@ -97,12 +99,7 @@ const registerUser= asyncHandler(async (req,res)=>{
         throw new ApiError(500,"something went wrong while registering User")
     }
 
-    return res.status(201).json(
-        new ApiResponse(200,createdUser,"User Registered Successfully")
-    )
-
-   
-
+    res.status(201).json("user registered success")
 
 })
 
@@ -191,7 +188,7 @@ const RefreshAccessToken= asyncHandler(async(req,res)=>{
     try{
         const incomingRefreshToken= req.cookies.refreshToken || req.body.refreshToken
 
-        if(incomingRefreshToken){
+        if(!incomingRefreshToken){
             throw new ApiError(401,"Unauthorized request")
         }
     
